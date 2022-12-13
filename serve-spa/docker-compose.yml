@@ -1,0 +1,23 @@
+version: "3.3"
+
+services:
+
+  traefik:
+    image: "traefik:v2.7"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  spa-to-http:
+    build: "frontend"
+    command: --brotli
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.spa-to-http.rule=Host(`serve-spa.localhost`)"
+      - "traefik.http.services.spa-to-http.loadbalancer.server.port=8080" # port inside of spa-to-http which should be used
